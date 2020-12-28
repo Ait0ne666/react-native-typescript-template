@@ -1,9 +1,11 @@
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
 import { TouchableOpacity } from 'react-native';
-import Animated, {Easing} from 'react-native-reanimated';
+import { PanGestureHandler, PanGestureHandlerStateChangeEvent, State } from 'react-native-gesture-handler';
+import Animated, {Value,Easing, block, set, cond,timing, clockRunning, Clock, spring, event, stopClock, startClock, eq, defined,lessThan, call } from 'react-native-reanimated';
 
 import { useRoot } from '../Root/root.provider';
+import ToastInner from './toast-inner.component';
 
 
 export interface ToastProps {
@@ -15,74 +17,45 @@ export interface ToastProps {
 }
 let timeout: NodeJS.Timeout
 
+
+
+
+
+
 const Toast:React.FC = () => {
     const {toastProps, hideToast} = useRoot()
     const styled = toastProps? styles(toastProps?.color,  toastProps?.actionButton) : null
     const [showToast, setShowToast] = useState(false)
-    const {Value, timing } = Animated
-    const animatedOpacity = new Value(0)
+    
+    
+    
 
     useEffect(() => {
         if (toastProps) {
             setShowToast(true);
-            // timeout = setTimeout(() => {
-            //     handleCloseToast()
-            // }, toastProps.duration)
+
         }
     }, [toastProps])
 
-    useEffect(() => {
-        if (showToast) {
-            (timing as any)(animatedOpacity, {
-                duration: 300,
-                toValue: 1,
-                easing: Easing.ease
-            }).start()
-        }
-    }, [showToast])
 
-    console.log(showToast)
 
-    const handleCloseToast = () => {
-        (timing as any)(animatedOpacity, {
-            duration: 300,
-            toValue: 0,
-            easing: Easing.ease
-        }).start(() => {
-            hideToast()
-            clearTimeout(timeout)
-            setShowToast(false)
-        })
+
+    const closeToast = () => {
+        hideToast()
+        setShowToast(false)
     }
+
 
 
     return (
         <Fragment>
             {
                 toastProps&&styled?
-                <Animated.View
-                style={[styled.container, { opacity: animatedOpacity}]}
-                >
-                    <View
-                    style={styled.messageContainer}
-                    >
-                        <Text 
-                        style={styled.message}
-                        >{toastProps.message}</Text>
-                    </View>
-                    {
-                        toastProps.actionButton!==false?
-                        <TouchableOpacity
-                        style={styled.actionContainer}
-                        onPress={handleCloseToast}
-                        >
-                            <Text
-                            style={styled.actionText}
-                            >{toastProps.actionButtonText? toastProps.actionButtonText: 'OK'}</Text>
-                        </TouchableOpacity>
-                        :null
-                    } 
-                </Animated.View>
+                <ToastInner
+                closeToast={closeToast}
+                showToast={showToast}
+                toastProps={toastProps}
+                />
                 :null
             }
         </Fragment>

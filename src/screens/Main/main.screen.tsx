@@ -13,7 +13,7 @@ const MainScreen:React.FC = () => {
     const handleShowToast = () => {
         showToast({
             color: '#ff8a80',
-            duration: 60000,
+            duration: 5000,
             message: 'I am the Toast'
         })
     }
